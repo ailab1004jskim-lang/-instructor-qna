@@ -16,4 +16,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - 사용자 입력을 이메일 HTML에 넣을 때는 `escapeHtml()`을 통과시킬 것 (`src/lib/email.ts`). 강사 답변도 예외가 아니다.
 - 질문번호 순번은 `Counter` 테이블의 원자적 증가로만 만든다. `count()` 기반 순번은 삭제 시 재사용·동시 제출 시 경합이 난다.
 - 파일 업로드를 도입하지 말 것. 디스크 쓰기가 없어야 배포처를 자유롭게 고를 수 있다 (`PRD.md` §5).
+- DB 연결은 두 갈래다. 앱 런타임(`src/lib/prisma.ts`)은 `DATABASE_URL`(풀러), 마이그레이션(`prisma.config.ts`)은 `DIRECT_URL`(직결). 마이그레이션을 풀러로 돌리지 말 것.
+- 개인 링크와 관리 화면은 색인 대상이 아니다. `src/app/robots.ts` 와 각 `noindex` 메타데이터를 유지할 것.
 - 본문 렌더링은 `.prose-block`(`white-space: pre-wrap`)을 통과시킬 것. 첨부가 없어 코드·에러 메시지가 본문으로 들어온다.

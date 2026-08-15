@@ -24,7 +24,8 @@ npm run dev               # http://localhost:3000
 
 | 변수 | 설명 |
 |---|---|
-| `DATABASE_URL` | PostgreSQL 연결 문자열. 서버리스 배포 시 커넥션 풀러 엔드포인트 사용 |
+| `DATABASE_URL` | **앱 실행용.** 서버리스(Vercel) 배포 시 반드시 커넥션 풀러 엔드포인트 (Neon 이면 호스트에 `-pooler`) |
+| `DIRECT_URL` | **마이그레이션 전용** 직결 연결. 비우면 `DATABASE_URL` 을 그대로 쓴다 |
 | `ADMIN_PASSWORD` | 강사 최초 로그인 비밀번호. 로그인 후 설정에서 바꾸면 DB 해시가 우선 |
 | `SESSION_SECRET` | 세션 쿠키 서명용 랜덤 문자열 |
 | `RESEND_API_KEY` | 비우면 이메일 발송을 건너뛴다(로컬 개발) |
