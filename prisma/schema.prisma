@@ -1,0 +1,77 @@
+// 강사 Q&A 플랫폼 — PRD-instructor-qna.md §6 기준
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// 학생. 이메일이 신원 키이며 token 이 개인 링크(/my/<token>)의 유일한 접근 수단.
+model Student {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  name      String
+  token     String     @unique
+  createdAt DateTime   @default(now())
+  questions Question[]
+}
+
+/// 질문 유형. 강사가 관리하며 삭제 불가(참조 무결성) — 비활성화만 가능.
+model Topic {
+  id        String     @id @default(cuid())
+  label     String
+  hint      String?
+  active    Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  questions Question[]
+}
+
+model Question {
+  id       String  @id @default(cuid())
+  /// Q-2026-0001-ABC · URL 식별자로도 사용
+  publicNo String  @unique
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  topicId   String
+  topic     Topic   @relation(fields: [topicId], references: [id])
+
+  /// 제출 시점 이름 스냅샷. Student.name 은 덮어써지므로 과거 이름 보존용.
+  submitterName String
+
+  /// 구조화 3필드 — 자유서술 한 칸을 강제 분해해 정보 부족을 막는다.
+  context String
+  tried   String
+  problem String
+
+  answer     String?
+  answeredAt DateTime?
+
+  /// 레이트리밋 판정용
+  submitterIp String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([answeredAt])
+  @@index([createdAt])
+  @@index([studentId])
+  @@index([topicId])
+  @@index([submitterIp, createdAt])
+}
+
+/// 질문번호 순번. count() 대신 원자적 증가로 경합·재사용을 막는다.
+model Counter {
+  year  Int @id
+  value Int @default(0)
+}
+
+model Settings {
+  id                Int     @id @default(1)
+  serviceName       String  @default("강사 질문방")
+  /// 강사 알림 수신 주소. 쉼표로 다중 등록.
+  notifyEmail       String?
+  adminPasswordHash String?
+}

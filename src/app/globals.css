@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, system-ui, "Malgun Gothic",
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas,
+    "D2Coding", monospace;
+
+  --color-bg: #f1f4f9;
+  --color-surface: #ffffff;
+  --color-line: #e4e9f0;
+  --color-ink: #1a2233;
+  --color-sub: #6b7688;
+
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+
+  --color-navy: #111c30;
+  --color-navy-active: #1e2c47;
+
+  --color-danger: #dc2626;
+  --color-danger-bg: #fee8e8;
+  --color-success: #16a34a;
+  --color-success-bg: #e8f7ee;
+  --color-warning: #ea8a00;
+  --color-warning-bg: #fdf0de;
+  --color-info-bg: #e8effc;
+  --color-cyan: #0e7490;
+  --color-cyan-bg: #e0f4f8;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* 공통 폼 요소 */
+.field-label {
+  @apply block text-[13px] font-medium text-sub mb-1.5;
+}
+.field-label .req {
+  @apply text-danger ml-0.5;
+}
+.field-input {
+  @apply w-full h-11 md:h-10 px-3 rounded-lg border border-line bg-surface text-[15px] md:text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 placeholder:text-sub/60;
+}
+.field-textarea {
+  @apply w-full px-3 py-2.5 rounded-lg border border-line bg-surface text-[15px] md:text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 placeholder:text-sub/60 min-h-28 resize-y;
+}
+.field-error {
+  @apply border-danger focus:border-danger focus:ring-danger/15;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center h-11 md:h-10 px-5 rounded-lg bg-primary text-white text-[15px] md:text-sm font-semibold transition-colors hover:bg-primary-hover disabled:opacity-50 disabled:pointer-events-none;
+}
+.btn-secondary {
+  @apply inline-flex items-center justify-center h-11 md:h-10 px-5 rounded-lg bg-surface border border-line text-ink text-[15px] md:text-sm font-medium transition-colors hover:bg-bg disabled:opacity-50 disabled:pointer-events-none;
+}
+.btn-danger {
+  @apply inline-flex items-center justify-center h-10 px-4 rounded-lg bg-danger-bg text-danger text-sm font-semibold transition-colors hover:bg-danger hover:text-white disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.card {
+  @apply bg-surface border border-line rounded-xl shadow-[0_1px_2px_rgb(0_0_0/0.04)];
+}
+
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap;
+}
+
+/*
+  첨부를 제외했으므로 학생이 붙여넣는 것은 대부분 에러 메시지·코드다.
+  개행이 뭉개지면 읽을 수 없으므로 본문 렌더링은 전부 이 클래스를 쓴다.
+*/
+.prose-block {
+  @apply whitespace-pre-wrap break-words text-[15px] md:text-sm leading-relaxed;
+}
+.prose-mono {
+  @apply font-mono text-[13px];
+}
