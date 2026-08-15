@@ -31,9 +31,34 @@ function labelRow(label: string, value: string) {
   )}</td><td>${escapeHtml(value)}</td></tr>`;
 }
 
+/**
+ * 개발 중에는 RESEND_API_KEY 가 비어 있어 메일이 나가지 않는다.
+ * 설계상 개인 링크는 메일로만 전달하므로, 키가 없으면 터미널에 내용을 찍어
+ * 링크를 확인할 수 있게 한다. 운영에서는 키가 있으므로 이 경로를 타지 않는다.
+ */
+function logToConsole(to: string[], subject: string, html: string) {
+  const links = [...html.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+  console.info(
+    [
+      "",
+      "─".repeat(72),
+      "[email] RESEND_API_KEY 가 없어 실제 발송을 건너뜁니다 (개발 모드)",
+      `  받는 사람: ${to.join(", ")}`,
+      `  제목:      ${subject}`,
+      ...links.map((l) => `  링크:      ${l}`),
+      "─".repeat(72),
+      "",
+    ].join("\n")
+  );
+}
+
 async function send(to: string[], subject: string, html: string) {
+  if (to.length === 0) return;
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || to.length === 0) return;
+  if (!apiKey) {
+    logToConsole(to, subject, html);
+    return;
+  }
   const settings = await getSettings();
   try {
     const resend = new Resend(apiKey);

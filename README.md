@@ -31,9 +31,9 @@ npm run dev               # http://localhost:3000
 | `EMAIL_FROM` | 발신 주소 (기본 `onboarding@resend.dev`) |
 | `APP_BASE_URL` | 메일 링크의 절대 URL. 비우면 요청 헤더에서 유추 |
 
-> **로컬 개발 주의** — `RESEND_API_KEY`가 비어 있으면 개인 링크 메일이 나가지 않는다.
-> 설계상 링크는 메일로만 전달하므로, 로컬에서는 `npm run db:studio`로 `Student.token`을
-> 확인해 `/my/<token>`으로 직접 접근한다.
+> **로컬 개발** — `RESEND_API_KEY`가 비어 있으면 실제 발송 대신 **터미널에 수신자·제목·링크를
+> 출력**한다(`src/lib/email.ts`의 `logToConsole`). 개인 링크는 설계상 메일로만 전달하므로,
+> 개발 중에는 `npm run dev` 로그에 찍힌 `/my/<token>` 링크를 그대로 열면 된다.
 
 ## 화면
 

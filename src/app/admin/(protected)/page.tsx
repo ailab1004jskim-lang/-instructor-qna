@@ -142,7 +142,11 @@ export default async function AdminDashboardPage({
                 <li key={question.id}>
                   <Link
                     href={`/admin/questions/${question.id}`}
-                    className="block px-4 py-3.5 hover:bg-bg transition-colors"
+                    className={`block px-4 py-3.5 border-l-4 transition-colors hover:bg-bg ${
+                      question.answeredAt
+                        ? "border-transparent"
+                        : "border-warning"
+                    }`}
                   >
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className={s.badgeClass}>{s.label}</span>

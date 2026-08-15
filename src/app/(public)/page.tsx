@@ -16,7 +16,7 @@ export default async function SubmitPage() {
       <div className="card p-5 md:p-7">
         <h1 className="text-lg md:text-xl font-bold">질문 보내기</h1>
         <p className="mt-1.5 text-sm text-sub">
-          아래 세 가지를 나눠서 적어주시면 한 번에 정확한 답을 드릴 수 있습니다.
+          강사가 확인 후 답변을 등록하면 이메일로 알려드립니다.
         </p>
 
         {topics.length === 0 ? (

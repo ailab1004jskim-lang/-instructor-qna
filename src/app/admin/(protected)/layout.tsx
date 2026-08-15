@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth";
 import { getSettings } from "@/lib/settings";
 import { AdminNav } from "@/components/admin/AdminNav";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "관리",
+  robots: { index: false, follow: false },
+};
 
 export default async function ProtectedAdminLayout({
   children,
