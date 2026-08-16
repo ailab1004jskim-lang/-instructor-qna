@@ -42,18 +42,41 @@ export function statusOf(answeredAt: Date | null) {
     : { label: "대기", badgeClass: PENDING_BADGE };
 }
 
-export function formatDateTime(d: Date | string) {
+/**
+ * 표시 시각은 한국 시간으로 고정한다.
+ * 서버의 로컬 시간에 의존하면 배포 환경(UTC)에서 9시간 어긋난 값이 나온다.
+ * getHours() 같은 로컬 기준 메서드를 여기 밖에서 쓰지 말 것.
+ */
+const KST = "Asia/Seoul";
+
+function kstParts(d: Date | string) {
   const date = typeof d === "string" ? new Date(d) : d;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-    date.getDate()
-  )} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: KST,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "";
+  return {
+    year: get("year"),
+    month: get("month"),
+    day: get("day"),
+    hour: get("hour"),
+    minute: get("minute"),
+  };
+}
+
+export function formatDateTime(d: Date | string) {
+  const { year, month, day, hour, minute } = kstParts(d);
+  return `${year}-${month}-${day} ${hour}:${minute}`;
 }
 
 export function formatDateTimeKorean(d: Date | string) {
-  const date = typeof d === "string" ? new Date(d) : d;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${pad(
-    date.getHours()
-  )}시 ${pad(date.getMinutes())}분`;
+  const { year, month, day, hour, minute } = kstParts(d);
+  return `${year}년 ${Number(month)}월 ${Number(day)}일 ${hour}시 ${minute}분`;
 }
