@@ -52,27 +52,60 @@ function logToConsole(to: string[], subject: string, html: string) {
   );
 }
 
+/**
+ * 발송 결과를 Settings 에 남긴다.
+ * 발송 실패를 사용자 화면에 드러내지 않는 설계이므로, 기록하지 않으면
+ * 강사도 운영자도 실패 사실 자체를 알 수 없다.
+ */
+async function recordResult(error: string | null) {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.settings.update({
+      where: { id: 1 },
+      data: error
+        ? { lastEmailError: error.slice(0, 1000), lastEmailErrorAt: new Date() }
+        : { lastEmailOkAt: new Date(), lastEmailError: null, lastEmailErrorAt: null },
+    });
+  } catch (e) {
+    console.error("[email] 결과 기록 실패:", e);
+  }
+}
+
 async function send(to: string[], subject: string, html: string) {
   if (to.length === 0) return;
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     logToConsole(to, subject, html);
+    await recordResult("RESEND_API_KEY 가 설정되어 있지 않습니다.");
     return;
   }
   const settings = await getSettings();
+  const from = `${settings.serviceName} <${
+    process.env.EMAIL_FROM ?? "onboarding@resend.dev"
+  }>`;
+
   try {
     const resend = new Resend(apiKey);
-    await resend.emails.send({
-      from: `${settings.serviceName} <${
-        process.env.EMAIL_FROM ?? "onboarding@resend.dev"
-      }>`,
-      to,
-      subject,
-      html,
-    });
+    // Resend SDK 는 API 오류를 예외로 던지지 않고 { data, error } 로 돌려준다.
+    // 반환값을 확인하지 않으면 실패가 통째로 묻힌다.
+    const result = await resend.emails.send({ from, to, subject, html });
+
+    if (result.error) {
+      const detail = `${result.error.name ?? "error"}: ${
+        result.error.message ?? JSON.stringify(result.error)
+      } (from=${from}, to=${to.join(", ")})`;
+      console.error("[email] 발송 실패:", detail);
+      await recordResult(detail);
+      return;
+    }
+
+    console.info(`[email] 발송 성공: ${subject} → ${to.join(", ")}`);
+    await recordResult(null);
   } catch (error) {
-    // 알림 실패가 본 동작(제출·답변 저장)을 막으면 안 됨
-    console.error("[email] 발송 실패:", error);
+    // 네트워크 오류 등. 알림 실패가 본 동작(제출·답변 저장)을 막으면 안 됨
+    const detail = `${(error as Error).name}: ${(error as Error).message} (from=${from})`;
+    console.error("[email] 발송 예외:", detail);
+    await recordResult(detail);
   }
 }
 
