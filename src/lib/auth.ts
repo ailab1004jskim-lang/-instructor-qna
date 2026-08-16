@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
+import { envOr } from "@/lib/env";
 
 const COOKIE_NAME = "qna_admin_session";
 
@@ -32,7 +33,8 @@ async function secretBasis() {
 
 function sessionTokenFor(basis: string) {
   return crypto
-    .createHmac("sha256", process.env.SESSION_SECRET ?? "dev-secret")
+    // 빈 문자열도 미설정으로 취급 (배포 플랫폼에서 변수만 만들고 값을 비우는 경우가 흔하다)
+    .createHmac("sha256", envOr("SESSION_SECRET", "dev-secret"))
     .update(`admin-session:${basis}`)
     .digest("hex");
 }

@@ -2,6 +2,7 @@ import "server-only";
 import { Resend } from "resend";
 import { formatDateTime, FIELD_LABELS } from "@/lib/constants";
 import { getSettings } from "@/lib/settings";
+import { envOr, hasEnv } from "@/lib/env";
 
 /**
  * HTML 이스케이프. 전신 A/S 앱은 사용자 입력을 그대로 보간해 인젝션 여지가 있었다.
@@ -73,16 +74,17 @@ async function recordResult(error: string | null) {
 
 async function send(to: string[], subject: string, html: string) {
   if (to.length === 0) return;
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
+  if (!hasEnv("RESEND_API_KEY")) {
     logToConsole(to, subject, html);
     await recordResult("RESEND_API_KEY 가 설정되어 있지 않습니다.");
     return;
   }
+  const apiKey = envOr("RESEND_API_KEY", "");
   const settings = await getSettings();
-  const from = `${settings.serviceName} <${
-    process.env.EMAIL_FROM ?? "onboarding@resend.dev"
-  }>`;
+  // 빈 문자열도 미설정으로 취급해야 한다. 값이 비면 발신 주소가 "이름 <>" 이 되어
+  // Resend 가 모든 발송을 거부한다.
+  const fromAddress = envOr("EMAIL_FROM", "onboarding@resend.dev");
+  const from = `${settings.serviceName} <${fromAddress}>`;
 
   try {
     const resend = new Resend(apiKey);
