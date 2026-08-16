@@ -21,6 +21,15 @@ export const RATE_LIMIT = {
   perEmailPerDay: 10,
 } as const;
 
+/**
+ * 관리자 로그인 시도 제한.
+ * 로그인 입구를 화면에 노출하는 이상, 무제한 대입을 막는 최소 방어가 필요하다.
+ */
+export const LOGIN_LIMIT = {
+  maxFailures: 5,
+  windowMinutes: 15,
+} as const;
+
 export const FIELD_LABELS = {
   context: "어디서 막혔나요",
   tried: "어떻게 시도해봤나요",

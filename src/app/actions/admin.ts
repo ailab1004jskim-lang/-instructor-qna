@@ -10,7 +10,8 @@ import {
   checkAdminPassword,
   changeAdminPassword,
 } from "@/lib/auth";
-import { getBaseUrl } from "@/lib/request";
+import { getBaseUrl, getClientIp } from "@/lib/request";
+import { checkLoginRateLimit, recordLoginAttempt } from "@/lib/rateLimit";
 import { notifyStudentAnswered } from "@/lib/email";
 import { MAX_LENGTHS } from "@/lib/constants";
 
@@ -26,10 +27,17 @@ export async function login(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const ip = await getClientIp();
+
+  // 로그인 입구를 화면에 노출하므로 무제한 대입을 먼저 막는다.
+  const limit = await checkLoginRateLimit(ip);
+  if (!limit.ok) return { error: limit.reason };
+
   const password = String(formData.get("password") ?? "");
-  if (!(await loginAdmin(password))) {
-    return { error: "비밀번호가 올바르지 않습니다." };
-  }
+  const ok = await loginAdmin(password);
+  await recordLoginAttempt(ip, ok);
+
+  if (!ok) return { error: "비밀번호가 올바르지 않습니다." };
   redirect("/admin");
 }
 
